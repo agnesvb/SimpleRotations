@@ -72,10 +72,8 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
                  A = randn(matrixsizes{i});
             else
                 if j>1
-                    disp("hallais");
                     break;
                 end
-                disp("halla");
                 A = testmatrices{i-numel(matrixsizes)};
             end
            
