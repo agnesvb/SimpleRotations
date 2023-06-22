@@ -1,6 +1,6 @@
 % ---- Comparing QR from householder reflections and simple rotations ---
 
-matrixsizes = { [10, 5], [100, 50], [300,70] };
+matrixsizes = { [10, 5], [100, 50], [1000,500] };
  
 %todo - add extra test matrices as a cell
 testmatrices = {hilb(10), hilb(50), hilb(100)};
