@@ -15,7 +15,7 @@ numiterations = 10;
 % third is projection test
 testarray = [1 1 1];
 [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsizes, numiterations, testarray, testmatrices);
-
+plotting(orth_result, col_result, proj_result);
 %The output is on the following form 
 
 %For the orthogonaltiy test
@@ -82,8 +82,8 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
                 
                 %ORTHOGONALITY TEST
                 if testarray(1)
-                    orthogonal_error_house(j) = norm(eye(size(A,1))-Q_house*R_house*(Q_house*R_house)',2);
-                    orthogonal_error_simple(j) = norm(eye(size(A,1))-Q_simple*R_simple*(Q_simple*R_simple)',2);
+                    orthogonal_error_house(j) = norm(eye(size(A,1))-Q_house*Q_house',2);
+                    orthogonal_error_simple(j) = norm(eye(size(A,1))-Q_simple*Q_simple',2);
                 end
                 
                 %COLOMN SPACE
@@ -189,5 +189,299 @@ function [Q, R] = SimpleQR(A)
   
 end
 
+function[] = plotting(orth_result, col_result, proj_result)
+    close all;
+    % Define the x-values
+    x = [1,2,3];
 
+    %ORTHOGONALTIY - RANDOM
+    % Define the y-values for dataset one
+    y1 = cell2mat( orth_result(1:3,1));
+
+    % Define the variances for dataset one
+    var1 = cell2mat( orth_result(1:3,3));
+
+    % Define the y-values for dataset two
+    y2 = cell2mat( orth_result(1:3,2));
+
+    % Define the variances for dataset two
+    var2 = cell2mat( orth_result(1:3,4));
+
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    errorbar( x,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
+    %plot(x, y1, 'b-', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    errorbar( x,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
+   % plot(x, y2, 'r-', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Orthogonality for random matrices');
+    xticks([1,2,3])
+    xticklabels({'10x5', '100x50', '300x70'});
+
+    % Set the legend
+    legend( 'Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    %HILBERT
+    
+    % Define the y-values for dataset one
+    y1 = cell2mat( orth_result(4:6,1));
+
+    % Define the y-values for dataset two
+    y2 = cell2mat( orth_result(4:6,2));
+
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    plot( x,y1,  '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    plot( x,y2, '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Orthogonality for Hilbert matrices');
+    xticks([1,2,3])
+    xticklabels({'10x10', '50x50', '100x100'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    
+    %COLOMNSPACE RANDOM
+    % Define the y-values for dataset one
+    y1 =cell2mat(  col_result(1:3,1));
+
+    % Define the variances for dataset one
+    var1 = cell2mat( col_result(1:3,3));
+
+    % Define the y-values for dataset two
+    y2 = cell2mat( col_result(1:3,2));
+
+    % Define the variances for dataset two
+    var2 = cell2mat( col_result(1:3,4));
+
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    errorbar( x,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    errorbar( x,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Columns space for random matrices');
+    xticks([1,2,3])
+    xticklabels({'10x5', '100x50', '300x70'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    %HILBERT
+    
+    % Define the y-values for dataset one
+    y1 = cell2mat( col_result(4:6,1));
+
+    % Define the y-values for dataset two
+    y2 = cell2mat( col_result(4:6,2));
+
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    plot( x,y1,  '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    plot( x,y2, '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Column space for Hilbert matrices');
+    xticks([1,2,3])
+    xticklabels({'10x10', '50x50', '100x100'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    
+    
+    %PROJECTION MATRIX
+    
+    
+    % Define the y-values for dataset one
+    y1 =cell2mat(  proj_result(1:3,1));
+    y1_1 = y1(:,1);
+    y1_2 = y1(:,2);
+
+    % Define the variances for dataset one
+    var1 = cell2mat( proj_result(1:3,3));
+    var1_1 = var1(:,1);
+    var1_2 = var1(:,2);
+
+    % Define the y-values for dataset two
+    y2 = cell2mat( proj_result(1:3,2));
+    y2_1 = y2(:,1);
+    y2_2 = y2(:,2);
+
+    % Define the variances for dataset two
+    var2 = cell2mat( proj_result(1:3,4));
+    var2_1 = var2(:,1);
+    var2_2 = var2(:,2);
+
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    errorbar( x,y1_1, var1_1.^(1/2), '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    errorbar( x,y2_1, var2_1.^(1/2), '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Projection with QQ^T for random mtx');
+    xticks([1,2,3])
+    xticklabels({'10x5', '100x50', '300x70'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    errorbar( x,y1_2, var1_2.^(1/2), '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    errorbar( x,y2_2, var2_2.^(1/2), '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Projection with I-QQ^T for random mtx');
+    xticks([1,2,3])
+    xticklabels({'10x5', '100x50', '300x70'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    %HILBERT
+    
+    % Define the y-values for dataset one
+    y1 = cell2mat( proj_result(4:6,1));
+    y1_1 = y1(:,1);
+    y1_2 = y1(:,2);
+    
+    % Define the y-values for dataset two
+    y2 = cell2mat( proj_result(4:6,2));
+    y2_1 = y2(:,1);
+    y2_2 = y2(:,2);
+    
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    plot( x,y1_1,  '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    plot( x,y2_1, '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Projection with QQ^T for Hilbert mtx');
+    xticks([1,2,3])
+    xticklabels({'10x10', '50x50', '100x100'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    plot( x,y1_2,  '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    plot( x,y2_2, '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Projection of with I-QQ^T for Hilbert mtx');
+    xticks([1,2,3])
+    xticklabels({'10x10', '50x50', '100x100'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    
+
+end
 %https://laurenthoeltgen.name/post/qr-benchmark/
