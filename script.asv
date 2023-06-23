@@ -234,6 +234,9 @@ function[] = plotting(orth_result, col_result, proj_result)
 
     % Hold off from further plotting
     hold off;
+    f = gcf;
+    exportgraphics(f,'plot1.png','Resolution',300)
+
     
     %HILBERT
     
@@ -268,6 +271,9 @@ function[] = plotting(orth_result, col_result, proj_result)
 
     % Hold off from further plotting
     hold off;
+    f = gcf;
+    exportgraphics(f,'plot2.png','Resolution',300)
+
     
     
     %COLOMNSPACE RANDOM
@@ -307,6 +313,9 @@ function[] = plotting(orth_result, col_result, proj_result)
 
     % Hold off from further plotting
     hold off;
+    f = gcf;
+    exportgraphics(f,'plot3.png','Resolution',300)
+
     
     %HILBERT
     
@@ -380,7 +389,7 @@ function[] = plotting(orth_result, col_result, proj_result)
     % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection of A onto col(QQ^T) for random matrices');
+    title('Error in Projection with QQ^T for random mtx');
     xticks([1,2,3])
     xticklabels({'10x5', '100x50', '300x70'});
 
@@ -405,7 +414,7 @@ function[] = plotting(orth_result, col_result, proj_result)
     % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection of A onto col(I-QQ^T) for random matrices');
+    title('Error in Projection with I-QQ^T for random mtx');
     xticks([1,2,3])
     xticklabels({'10x5', '100x50', '300x70'});
 
@@ -442,7 +451,33 @@ function[] = plotting(orth_result, col_result, proj_result)
     % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection of A onto col(QQ^T) for Hilbert matrices');
+    title('Error in Projection with QQ^T for Hilbert mtx');
+    xticks([1,2,3])
+    xticklabels({'10x10', '50x50', '100x100'});
+
+    % Set the legend
+    legend('Householder Reflections', 'Simple Rotations');
+
+    % Turn the grid on
+    grid on;
+
+    % Hold off from further plotting
+    hold off;
+    
+    % Create the figure and axes
+    figure;
+    hold on;
+
+    % Plot the first dataset with error bars
+    plot( x,y1_2,  '-bo', 'LineWidth', 1.5);
+
+    % Plot the second dataset with error bars
+    plot( x,y2_2, '-ro', 'LineWidth', 1.5);
+
+    % Set the axis labels and title
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    title('Error in Projection of with I-QQ^T for Hilbert mtx');
     xticks([1,2,3])
     xticklabels({'10x10', '50x50', '100x100'});
 
