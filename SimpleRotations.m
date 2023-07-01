@@ -7,7 +7,7 @@ numrand = size(matrixsizes,2);
 cyclematrices = {10,50,100};
 numtest = size(cyclematrices,2);
 
-numiterations = 10;
+numiterations = 100;
 
 % What tests to run: 
 % [0 0 0] are no tests
@@ -74,7 +74,7 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
             if i <= numel(matrixsizes)
                  A = randn(matrixsizes{i});
             else
-                A = gallery("cycol",testmatrices{i-numel(matrixsizes)}, 3);
+                A = gallery("cycol",testmatrices{i-numel(matrixsizes)});
             end
            
                 [Q_house, R_house] = qr(A);
@@ -115,6 +115,7 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
                 orth_result{i,2} = mean(orthogonal_error_simple);
                 orth_result{i,3} = var(orthogonal_error_house);
                 orth_result{i,4} = var(orthogonal_error_simple); 
+               
 
         end
         
@@ -153,9 +154,6 @@ function [Q, R] = SimpleQR(A)
 
     for i=1:M-1
         A_i = A_aug(i:end, i:end);
-        if A_i(:,1) == zeros(size(A_i(:,1)))
-            break;
-        end
         x = A_i(:,1);
 
         length = size(x,1);
