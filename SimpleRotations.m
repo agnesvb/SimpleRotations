@@ -74,7 +74,7 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
             if i <= numel(matrixsizes)
                  A = randn(matrixsizes{i});
             else
-                A = gallery("cycol",testmatrices{i-numel(matrixsizes)});
+                A = gallery("frank",testmatrices{i-numel(matrixsizes)});
             end
            
                 [Q_house, R_house] = qr(A);
@@ -243,7 +243,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
 
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Orthogonality for Cyclic matrices');
+    title('Error in Orthogonality for Frank matrices');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
     legend('Householder Reflections', 'Simple Rotations');
@@ -289,7 +289,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
     exportgraphics(f,'plot3.png','Resolution',300)
 
     
-    %Cyclic
+    %frank
     
 
     % Define the y-values for Householder
@@ -314,7 +314,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
 
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Column space for Cyclic matrices');
+    title('Error in Column space for frank matrices');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
@@ -392,7 +392,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
     exportgraphics(f,'plot6.png','Resolution',300)
 
     
-    %Cyclic
+    %frank
     
     % Define the y-values for Householder
     y1 = cell2mat( proj_result(numrand+1:end,1));
@@ -420,7 +420,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
 
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection onto col(Q) for Cyclic mtx');
+    title('Error in Projection onto col(Q) for frank mtx');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
@@ -442,7 +442,7 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
 
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection onto null(Q) for Cyclic mtx');
+    title('Error in Projection onto null(Q) for frank mtx');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
