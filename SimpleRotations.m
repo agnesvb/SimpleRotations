@@ -74,7 +74,7 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
             if i <= numel(matrixsizes)
                  A = randn(matrixsizes{i});
             else
-                A = gallery("cycol",testmatrices{i-numel(matrixsizes)});
+                A = gallery(3);
             end
            
                 [Q_house, R_house] = qr(A);
