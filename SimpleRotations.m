@@ -3,11 +3,11 @@
 matrixsizes = { [10, 5], [100, 50], [300,70] };
 numrand = size(matrixsizes,2);
  
-%todo - add extra test matrices as a cell
-testmatrices = {hilb(10), hilb(50), hilb(100)};
-numtest = size(testmatrices,2);
 
-numiterations = 10;
+cyclematrices = {10,50,100};
+numtest = size(cyclematrices,2);
+
+numiterations = 100;
 
 % What tests to run: 
 % [0 0 0] are no tests
@@ -16,8 +16,7 @@ numiterations = 10;
 % second element is columnspace test
 % third is projection test
 testarray = [1 1 1];
-
-[orth_result, col_result, proj_result] = householdervsimpleQR(matrixsizes, numiterations, testarray, testmatrices);
+[orth_result, col_result, proj_result] = householdervsimpleQR(matrixsizes, numiterations, testarray, cyclematrices);
 
 plotting(orth_result, col_result, proj_result, numrand, numtest);
 %OBS,if changing the dimensions and types of testmatrices, you have to
@@ -52,10 +51,7 @@ plotting(orth_result, col_result, proj_result, numrand, numtest);
 
 
 function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsizes, numiterations, testarray, testmatrices)%add testmatrices as input
-    if  ~isequal(size(testarray), [1 3]) 
-        error('Invalid input');
-    end
-    %add test more tests on input 
+
     
     numsizes = numel(matrixsizes)+numel(testmatrices);
     
@@ -76,13 +72,9 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
         
         for j=1:numiterations %number of tests per size
             if i <= numel(matrixsizes)
-                    %Do what is already here
                  A = randn(matrixsizes{i});
             else
-                if j>1
-                    break;
-                end
-                A = testmatrices{i-numel(matrixsizes)};
+                A = gallery("cycol",testmatrices{i-numel(matrixsizes)});
             end
            
                 [Q_house, R_house] = qr(A);
@@ -96,59 +88,51 @@ function [orth_result, col_result, proj_result] = householdervsimpleQR(matrixsiz
                 
                 %COLOMN SPACE
                 if testarray(2)
+                    
                     colA = orth((A));
-                    colhouse = orth((Q_house*R_house));
-                    colsimple = orth((Q_simple*R_simple));
 
-                    column_error_house(j) = norm(colA - colhouse,2);
-                    column_error_simple(j) = norm(colA - colsimple,2);
+                    colhouse = orth((Q_house));
+                    colsimple = orth((Q_simple));
+
+                    column_error_house(j)  = subspace(colA,colhouse);
+                    column_error_simple(j) = subspace(colA,colsimple);
                 end
                 
                 %PROJECTION
                 if testarray(3)
-                    proj_error_house(j,1) = norm(A - Q_house*Q_house'* A,2);
-                    proj_error_simple(j,1) = norm(A - Q_simple*Q_simple'* A,2);
-                    proj_error_house(j,2) = norm(0 - (eye(size(A,1)) - Q_house*Q_house')* A,2);
-                    proj_error_simple(j,2) = norm(0 - (eye(size(A,1)) - Q_simple*Q_simple')* A,2);
+                    disp(i);
+                    proj_error_house(j,1) = norm(A - Q_house*inv(Q_house'*Q_house)*Q_house'* A,2);
+                    proj_error_simple(j,1) = norm(A - Q_simple*inv(Q_simple'*Q_simple)*Q_simple'* A,2);
+                    proj_error_house(j,2) = norm(0 - (eye(size(A,1)) - Q_house'*inv(Q_house*Q_house')*Q_house)* A,2);
+                    proj_error_simple(j,2) = norm(0 - (eye(size(A,1)) -Q_simple'*inv(Q_simple*Q_simple')*Q_simple)* A,2);
                 end
                 
             
         end
         %Create mean and variance and add it to cell array
         if testarray(1)
-            if i <= numel(matrixsizes)
                 orth_result{i,1} = mean(orthogonal_error_house);
                 orth_result{i,2} = mean(orthogonal_error_simple);
                 orth_result{i,3} = var(orthogonal_error_house);
                 orth_result{i,4} = var(orthogonal_error_simple); 
-            else 
-                orth_result{i,1} = orthogonal_error_house(1);
-                orth_result{i,2} = orthogonal_error_simple(1);
-            end
+               
+
         end
         
         if testarray(2)
-            if i <= numel(matrixsizes)
                 col_result{i,1} = mean(column_error_house);
                 col_result{i,2} = mean(column_error_simple);
                 col_result{i,3} = var(column_error_house);
                 col_result{i,4} = var(column_error_simple); 
-            else
-                col_result{i,1} = column_error_house(1);
-                col_result{i,2} = column_error_simple(1);
-            end
+
         end
         
         if testarray(3)
-            if i <= numel(matrixsizes)
                 proj_result{i,1} = mean(proj_error_house);
                 proj_result{i,2} = mean(proj_error_simple);
                 proj_result{i,3} = var(proj_error_house);
                 proj_result{i,4} = var(proj_error_simple);  
-            else
-                proj_result{i,1} = proj_error_house(1,:);
-                proj_result{i,2} = proj_error_simple(1,:);
-            end
+
         end
         
 
@@ -202,84 +186,70 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
     % Define the x-values
     xrand = linspace(1, numrand, numrand);
     xtest = linspace(1, numtest, numtest);
-    x = [1,2,3];
 
     %ORTHOGONALTIY - RANDOM
-    % Define the y-values for dataset one
+    % Define the y-values for Householder
     y1 = cell2mat( orth_result(1:numrand,1));
 
-    % Define the variances for dataset one
+    % Define the variances for Householder
     var1 = cell2mat( orth_result(1:numrand,3));
 
-    % Define the y-values for dataset two
+    % Define the y-values for simple
     y2 = cell2mat( orth_result(1:numrand,2));
 
-    % Define the variances for dataset two
+    % Define the variances for simple
     var2 = cell2mat( orth_result(1:numrand,4));
 
     % Create the figure and axes
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
     errorbar( xrand,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
-    %plot(x, y1, 'b-', 'LineWidth', 1.5);
 
-    % Plot the second dataset with error bars
     errorbar( xrand,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
-   % plot(x, y2, 'r-', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
     title('Error in Orthogonality for random matrices');
     xticks(xrand)
     xticklabels({'10x5', '100x50', '300x70'});
-
-    % Set the legend
     legend( 'Householder Reflections', 'Simple Rotations');
 
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot1.png','Resolution',300)
 
     
-    %HILBERT
-    
-    % Define the y-values for dataset one
+    % Define the y-values for Householder
     y1 = cell2mat( orth_result(numrand+1:end,1));
 
-    % Define the y-values for dataset two
+    % Define the variances for Householder
+    var1 = cell2mat( orth_result(numrand+1:end,3));
+
+    % Define the y-values for simple
     y2 = cell2mat( orth_result(numrand+1:end,2));
 
-    % Create the figure and axes
+    % Define the variances for simple
+    var2 = cell2mat( orth_result(numrand+1:end,4));
+
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
-    plot( xtest,y1,  '-bo', 'LineWidth', 1.5);
 
-    % Plot the second dataset with error bars
-    plot( xtest,y2, '-ro', 'LineWidth', 1.5);
+    errorbar( xtest,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
+    errorbar( xtest,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Orthogonality for Hilbert matrices');
+    title('Error in Orthogonality for Cyclic matrices');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
-
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
 
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot2.png','Resolution',300)
@@ -287,78 +257,71 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
     
     
     %COLOMNSPACE RANDOM
-    % Define the y-values for dataset one
+    % Define the y-values for Householder
     y1 =cell2mat(  col_result(1:numrand,1));
 
-    % Define the variances for dataset one
+    % Define the variances for Householder
     var1 = cell2mat( col_result(1:numrand,3));
 
-    % Define the y-values for dataset two
+    % Define the y-values for Simple
     y2 = cell2mat( col_result(1:numrand,2));
 
-    % Define the variances for dataset two
+    % Define the variances for Simple
     var2 = cell2mat( col_result(1:numrand,4));
 
-    % Create the figure and axes
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
     errorbar( xrand,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
-
-    % Plot the second dataset with error bars
     errorbar( xrand,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
     title('Error in Columns space for random matrices');
     xticks(xrand)
     xticklabels({'10x5', '100x50', '300x70'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot3.png','Resolution',300)
 
     
-    %HILBERT
+    %Cyclic
     
-    % Define the y-values for dataset one
-    y1 = cell2mat( col_result(numrand+1:end,1));
 
-    % Define the y-values for dataset two
+    % Define the y-values for Householder
+    y1 =cell2mat(  col_result(numrand+1:end,1));
+
+    % Define the variances for Householder
+    var1 = cell2mat( col_result(numrand+1:end,3));
+
+    % Define the y-values for Simple
     y2 = cell2mat( col_result(numrand+1:end,2));
 
-    % Create the figure and axes
+    % Define the variances for Simple
+    var2 = cell2mat( col_result(numrand+1:end,4));
+    
+    
+
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
-    plot( xtest,y1,  '-bo', 'LineWidth', 1.5);
+    errorbar( xtest,y1, var1.^(1/2), '-bo', 'LineWidth', 1.5);
+    errorbar( xtest,y2, var2.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Plot the second dataset with error bars
-    plot( xtest,y2, '-ro', 'LineWidth', 1.5);
-
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Column space for Hilbert matrices');
+    title('Error in Column space for Cyclic matrices');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
 
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot4.png','Resolution',300)
@@ -369,152 +332,126 @@ function[] = plotting(orth_result, col_result, proj_result, numrand, numtest)
     %PROJECTION MATRIX
     
     
-    % Define the y-values for dataset one
+    % Define the y-values for Householder
     y1 =cell2mat(  proj_result(1:numrand,1));
     y1_1 = y1(:,1);
     y1_2 = y1(:,2);
 
-    % Define the variances for dataset one
+    % Define the variances for Householder
     var1 = cell2mat( proj_result(1:numrand,3));
     var1_1 = var1(:,1);
     var1_2 = var1(:,2);
 
-    % Define the y-values for dataset two
+    % Define the y-values for Simple
     y2 = cell2mat( proj_result(1:numrand,2));
     y2_1 = y2(:,1);
     y2_2 = y2(:,2);
 
-    % Define the variances for dataset two
+    % Define the variances for Simple
     var2 = cell2mat( proj_result(1:numrand,4));
     var2_1 = var2(:,1);
     var2_2 = var2(:,2);
 
-    % Create the figure and axes
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
     errorbar( xrand,y1_1, var1_1.^(1/2), '-bo', 'LineWidth', 1.5);
-
-    % Plot the second dataset with error bars
     errorbar( xrand,y2_1, var2_1.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection with QQ^T for random mtx');
+    title('Error in Projection onto col(Q) for randn mtx');
     xticks(xrand)
     xticklabels({'10x5', '100x50', '300x70'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot5.png','Resolution',300)
 
     
-    % Create the figure and axes
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
     errorbar( xrand,y1_2, var1_2.^(1/2), '-bo', 'LineWidth', 1.5);
-
-    % Plot the second dataset with error bars
     errorbar( xrand,y2_2, var2_2.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection with I-QQ^T for random mtx');
+    title('Error in Projection onto null(Q) for randn mtx');
     xticks(xrand)
     xticklabels({'10x5', '100x50', '300x70'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot6.png','Resolution',300)
 
     
-    %HILBERT
+    %Cyclic
     
-    % Define the y-values for dataset one
+    % Define the y-values for Householder
     y1 = cell2mat( proj_result(numrand+1:end,1));
     y1_1 = y1(:,1);
     y1_2 = y1(:,2);
     
-    % Define the y-values for dataset two
+    var1 = cell2mat( proj_result(numrand+1:end,3));
+    var1_1 = var1(:,1);
+    var1_2 = var1(:,2);
+    
+    % Define the y-values for Simple
     y2 = cell2mat( proj_result(numrand+1:end,2));
     y2_1 = y2(:,1);
     y2_2 = y2(:,2);
     
-    % Create the figure and axes
+    var2 = cell2mat( proj_result(numrand+1:end,4));
+    var2_1 = var2(:,1);
+    var2_2 = var2(:,2);
+    
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
-    plot( xtest,y1_1,  '-bo', 'LineWidth', 1.5);
+    errorbar( xrand,y1_1, var1_1.^(1/2), '-bo', 'LineWidth', 1.5);
+    errorbar( xrand,y2_1, var2_1.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Plot the second dataset with error bars
-    plot( xtest,y2_1, '-ro', 'LineWidth', 1.5);
-
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection with QQ^T for Hilbert mtx');
+    title('Error in Projection onto col(Q) for Cyclic mtx');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
 
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot7.png','Resolution',300)
 
     
-    % Create the figure and axes
     figure;
     hold on;
 
-    % Plot the first dataset with error bars
-    plot( xtest,y1_2,  '-bo', 'LineWidth', 1.5);
+    errorbar( xrand,y1_2, var1_2.^(1/2), '-bo', 'LineWidth', 1.5);
 
-    % Plot the second dataset with error bars
-    plot( xtest,y2_2, '-ro', 'LineWidth', 1.5);
+    errorbar( xrand,y2_2, var2_2.^(1/2), '-ro', 'LineWidth', 1.5);
 
-    % Set the axis labels and title
     xlabel('X-axis');
     ylabel('Y-axis');
-    title('Error in Projection of with I-QQ^T for Hilbert mtx');
+    title('Error in Projection onto null(Q) for Cyclic mtx');
     xticks(xtest)
     xticklabels({'10x10', '50x50', '100x100'});
 
-    % Set the legend
     legend('Householder Reflections', 'Simple Rotations');
 
-    % Turn the grid on
     grid on;
 
-    % Hold off from further plotting
     hold off;
     f = gcf;
     exportgraphics(f,'plot8.png','Resolution',300)
-
-    
-    
 
 end
